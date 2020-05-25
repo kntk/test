@@ -1,0 +1,6 @@
+.vagrant
+
+# for Working
+tmp/
+vendor/
+!.gitkeep
