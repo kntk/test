@@ -1,0 +1,42 @@
+---
+- name: "Install package"
+  yum:
+    name:
+      - squid
+      - httpd-tools
+    state: present
+
+- name: "Update config"
+  template:
+    src  : squid.conf.j2
+    dest : /etc/squid/squid.conf
+    mode : 0640
+    owner: root
+    group: root
+  notify: "Reload squid"
+
+- name: "Create Drop-In Unit directory"
+  file:
+    path : /etc/systemd/system/squid.service.d
+    mode : 0755
+    owner: root
+    group: root
+    state: directory
+
+- name: "Update Drop-In Unit Configs"
+  template:
+    src  : "{{ item }}.j2"
+    dest : "/etc/systemd/system/squid.service.d/{{ item }}"
+    mode : 0644
+    owner: root
+    group: root
+  with_items:
+    - 10-limits.conf
+  notify: "Restart squid"
+
+- name: "Ensure squid is running"
+  systemd:
+    name: squid.service
+    state: started
+    enabled: yes
+    daemon_reload: yes

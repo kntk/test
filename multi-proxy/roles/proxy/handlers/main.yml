@@ -1,0 +1,13 @@
+---
+- name: "Restart squid"
+  systemd:
+    name: squid.service
+    state: restarted
+    daemon_reload: yes
+  register: squid_restarted
+
+- name: "Reload squid"
+  systemd:
+    name: squid.service
+    state: reloaded
+  when: squid_restarted is not defined

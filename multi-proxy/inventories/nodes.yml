@@ -1,0 +1,12 @@
+proxy:
+  children:
+    proxy-parent:
+      hosts:
+        192.168.1.10:
+    proxy-child:
+      hosts:
+        192.168.1.11:
+
+client:
+  hosts:
+    192.168.1.12:
