@@ -1,0 +1,37 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$script = <<EOS
+echo 'ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBGtC5/AqJyOBIIol6IgLfkt7JLoJULrUjv0HclD6kfxjdB68Xg+nV0nDzUMP2bDQkn18Rc3D5Se9xBGilLisIA= ochiba-test' >> /home/vagrant/.ssh/authorized_keys
+setenforce 0
+sed -i 's/^SELINUX=.*$/SELINUX=disabled/' /etc/selinux/config
+timedatectl set-timezone Asia/Tokyo
+yum -y install vim net-tools tcpdump
+EOS
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "centos/7"
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "1024"
+  end
+
+  config.vm.define :prx00 do |prx00|
+    prx00.vm.hostname = 'prx00'
+    prx00.vm.provision :shell, inline: $script
+    prx00.vm.network "private_network", ip: "192.168.1.10"
+    prx00.vm.network "private_network", ip: "172.16.10.10", virtualbox__intnet: "dmz"
+  end
+  config.vm.define :prx10 do |prx10|
+    prx10.vm.hostname = 'prx10'
+    prx10.vm.provision :shell, inline: $script
+    prx10.vm.network "private_network", ip: "192.168.1.11"
+    prx10.vm.network "private_network", ip: "172.16.10.11", virtualbox__intnet: "dmz"
+    prx10.vm.network "private_network", ip: "172.16.20.11", virtualbox__intnet: "int"
+  end
+  config.vm.define :clt00 do |clt00|
+    clt00.vm.hostname = 'clt00'
+    clt00.vm.provision :shell, inline: $script
+    clt00.vm.network "private_network", ip: "192.168.1.12"
+    clt00.vm.network "private_network", ip: "172.16.20.12", virtualbox__intnet: "int"
+  end
+end
